@@ -22,21 +22,21 @@ public class AutorService {
         return autorRepository.save(autor);
     }
 
-    public AutorModel buscarAutorPorId(Long id){
-        return autorRepository.findById(id).get();
+    public Optional<AutorModel> buscarAutorPorId(Long id){
+        return autorRepository.findById(id);
     }
 
     public AutorModel atualizarAutor(Long id, AutorModel autorModel){
-        AutorModel model =  autorRepository.findById(id).get();
+        AutorModel model = autorRepository.findById(id).get();
+
         model.setNome(autorModel.getNome());
         model.setDataNascimento(autorModel.getDataNascimento());
         model.setNacionalidade(autorModel.getNacionalidade());
+
         return autorRepository.save(model);
     }
-
 
     public void deletarAutor(Long id){
         autorRepository.deleteById(id);
     }
-
 }

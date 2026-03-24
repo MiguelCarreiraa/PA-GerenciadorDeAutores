@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping(path = "/autores")
@@ -16,27 +20,49 @@ public class AutorController {
     private AutorService autorService;
 
     @GetMapping
-    public List<AutorModel> listarAutores(){
-        return autorService.findAll();
+    public ResponseEntity<List<AutorModel>> listarAutores(){
+        return ResponseEntity.ok(autorService.findAll());
     }
 
     @PostMapping
-    public AutorModel criarAutor(@RequestBody AutorModel autorModel){
-        return autorService.criarAutor(autorModel);
+    public ResponseEntity<AutorModel> criarAutor(@RequestBody AutorModel autorModel){
+        AutorModel novo = autorService.criarAutor(autorModel);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novo);
     }
 
     @GetMapping("/{id}")
-    public AutorModel buscarAutor(@PathVariable Long id){
-        return autorService.buscarAutorPorId(id);
+    public ResponseEntity<AutorModel> buscarAutor(@PathVariable Long id){
+        Optional<AutorModel> autor = autorService.buscarAutorPorId(id);
+
+        if (autor.isPresent()) {
+            return ResponseEntity.ok(autor.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PutMapping("/{id}")
-    public AutorModel atualizarAutor(@PathVariable Long id, @RequestBody AutorModel autorModel){
-        return autorService.atualizarAutor(id, autorModel);
+    public ResponseEntity<AutorModel> atualizarAutor(@PathVariable Long id,
+                                                     @RequestBody AutorModel autorModel){
+        Optional<AutorModel> existente = autorService.buscarAutorPorId(id);
+
+        if (existente.isPresent()) {
+            AutorModel atualizado = autorService.atualizarAutor(id, autorModel);
+            return ResponseEntity.ok(atualizado);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deletarAutor(@PathVariable Long id){
-        autorService.deletarAutor(id);
+    public ResponseEntity<Void> deletarAutor(@PathVariable Long id){
+        Optional<AutorModel> existente = autorService.buscarAutorPorId(id);
+
+        if (existente.isPresent()) {
+            autorService.deletarAutor(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 }
